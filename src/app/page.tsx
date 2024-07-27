@@ -50,17 +50,17 @@ export default function Home() {
   };
   const fetchUserData = async () => {
     const supabase = createClient();
-    const temp = [[], [], [], [], []];
+    const temp = [[], [], [], [], []] as any;
     const disableTemp = disable;
     for (let i = 0; i < 5; i++) {
       const formattedDate = date[i].toISOString().split("T")[0];
-      const { data: userMeal } = await supabase
+      const { data: userMealtemp } = await supabase
         .from("user-lunch")
         .select(`*, menu:menuId(*)`)
         .eq("date", formattedDate)
         .eq("team", team[selectedTeam - 1].team)
         .eq("user", name);
-      console.log(userMeal, mealChoice[i]);
+      const userMeal = userMealtemp as any;
       if (
         userMeal &&
         userMeal.length > 0 &&
