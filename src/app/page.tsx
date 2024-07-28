@@ -86,7 +86,7 @@ export default function Home() {
     toast.info("loaded");
   };
   const saveUserData = async () => {
-    console.log(selectedMenu);
+    // console.log(selectedMenu);
     for (let i = 0; i < 5; i++) {
       const formattedDate = date[i].toISOString().split("T")[0];
       await supabase
@@ -185,7 +185,7 @@ export default function Home() {
                 disabled={disable.includes(i)}
                 value={selectedMenu[i][0]?.id}
                 onChange={(e) => {
-                  console.log(e.target.value);
+                  // console.log(e.target.value);
                   setSelectedMenu([
                     ...selectedMenu.slice(0, i),
                     [menu[parseInt(e.target.value) - 1]],

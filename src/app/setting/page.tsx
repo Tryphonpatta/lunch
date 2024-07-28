@@ -106,15 +106,15 @@ export default function Page() {
     const temp: LunchChoice[][] = [[], [], [], [], []];
     for (let i = 0; i < 5; i++) {
       const formattedDate = date[i].toISOString().split("T")[0];
-      console.log(date[i], formattedDate);
+      // console.log(date[i], formattedDate);
       let { data: menu, error } = await supabase
         .from("lunch-choice")
         .select(`*, menu:menuId(*)`)
         .eq("date", formattedDate);
-      console.log(menu);
+      // console.log(menu);
       if (menu) temp[i] = menu.map((m: any) => m.menu);
     }
-    console.log(temp);
+    // console.log(temp);
     setSelectedMenu(temp);
   };
 
