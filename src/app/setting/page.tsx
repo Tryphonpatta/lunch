@@ -6,12 +6,16 @@ import { getDate } from "../../../util/date/getDate";
 import { Accordion, Button, Modal } from "flowbite-react";
 import { IoMdAdd } from "react-icons/io";
 import { LunchChoice, Menu } from "../type/type";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import LoginPage from "./components/loginPage";
 
 export default function Page() {
   const [menu, setMenu] = useState<Menu[]>([]);
   const [date, setDate] = useState<Date[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<any>([[], [], [], [], []]);
   const [showModal, setShowModal] = useState(-1);
+  const [isLogin, setIsLogin] = useState(false);
   const addMenu = (m: number, d: number) => {
     let temp = selectedMenu[d];
     if (!temp.includes(menu[m])) temp.push(menu[m]);
@@ -55,24 +59,39 @@ export default function Page() {
         }))
       );
     }
+    toast.success("Save success");
   };
   const randomMenu = async (d: number) => {
     let typeTemp = "";
-    let randomMenu = [];
+    let randomMenu = [] as Menu[];
     let first = 0;
     let last = 0;
-    for (let menuItr of menu) {
-      if (menuItr.type !== typeTemp) {
-        typeTemp = menuItr.type;
-        last = menuItr.id - 1;
-        if (last > first) {
-          let rnd = Math.round(Math.random() * (last - first)) + first;
-          console.log(rnd, first, last);
-          randomMenu.push(menu[rnd - 1]);
+    let rnd = Math.random();
+    let menuSortFromPrice = menu.toSorted((a, b) => a.price - b.price);
+    let normalMenu = menuSortFromPrice.filter((m) => m.price < 70);
+    let expensiveMenu = menuSortFromPrice.filter((m) => m.price >= 70);
+    console.log(normalMenu, expensiveMenu);
+    if (rnd > 0.5) {
+      // 79 1 meal
+      for (let i = 0; i < 4; i++) {
+        let index = Math.round(Math.random() * (normalMenu.length - 1));
+        while (randomMenu.includes(normalMenu[index])) {
+          index = Math.round(Math.random() * (normalMenu.length - 1));
         }
-        first = menuItr.id;
+        randomMenu.push(normalMenu[index]);
+      }
+      let index = Math.round(Math.random() * (expensiveMenu.length - 1));
+      randomMenu.push(expensiveMenu[index]);
+    } else {
+      for (let i = 0; i < 5; i++) {
+        let index = Math.round(Math.random() * (normalMenu.length - 1));
+        while (randomMenu.includes(normalMenu[index])) {
+          index = Math.round(Math.random() * (normalMenu.length - 1));
+        }
+        randomMenu.push(normalMenu[index]);
       }
     }
+
     setSelectedMenu([
       ...selectedMenu.slice(0, d),
       randomMenu,
@@ -110,79 +129,86 @@ export default function Page() {
     fetchSelectedMenu();
   }, []);
   return (
-    <div className="h-screen p-2 max-w-md mx-auto flex flex-col">
-      <div className="flex flex-col gap-3">
-        <h1>Settings</h1>
-        <Accordion>
-          {date.map((d, i) => (
-            <Accordion.Panel key={`${i + 0}`}>
-              <Accordion.Title>{d.toDateString()}</Accordion.Title>
-              <Accordion.Content>
-                <div className="m-2 flex flex-col gap-3">
-                  <div className="flex w-full justify-end gap-1">
-                    <Button color="warning" onClick={() => randomMenu(i)}>
-                      random
-                    </Button>
-                    <Button color="failure" onClick={() => resetMenu(i)}>
-                      reset
-                    </Button>
-                  </div>
-                  <div>
-                    <div>
-                      {selectedMenu[i].map((m: Menu) => (
-                        <div
-                          key={m.id}
-                          className="flex justify-between h-12 m-2"
-                          onClick={() => removeMenu(m.id, i)}
-                        >
-                          <p>{m.menu}</p>
-                          <p>{m.price}</p>
+    <div>
+      <ToastContainer />
+      <div className="h-screen p-2 max-w-md mx-auto flex flex-col">
+        {!isLogin ? (
+          <LoginPage isLogin={isLogin} setIsLogin={setIsLogin}></LoginPage>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <h1>Settings</h1>
+            <Accordion>
+              {date.map((d, i) => (
+                <Accordion.Panel key={`${i + 0}`}>
+                  <Accordion.Title>{d.toDateString()}</Accordion.Title>
+                  <Accordion.Content>
+                    <div className="m-2 flex flex-col gap-3">
+                      <div className="flex w-full justify-end gap-1">
+                        <Button color="warning" onClick={() => randomMenu(i)}>
+                          random
+                        </Button>
+                        <Button color="failure" onClick={() => resetMenu(i)}>
+                          reset
+                        </Button>
+                      </div>
+                      <div>
+                        <div>
+                          {selectedMenu[i].map((m: Menu) => (
+                            <div
+                              key={m.id}
+                              className="flex justify-between h-12 m-2"
+                              onClick={() => removeMenu(m.id, i)}
+                            >
+                              <p>{m.menu}</p>
+                              <p>{m.price}</p>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                        <Button
+                          color="success"
+                          className="w-full"
+                          onClick={() => {
+                            setShowModal(i);
+                          }}
+                        >
+                          <IoMdAdd></IoMdAdd>
+                        </Button>
+                      </div>
                     </div>
-                    <Button
-                      color="success"
-                      className="w-full"
-                      onClick={() => {
-                        setShowModal(i);
-                      }}
-                    >
-                      <IoMdAdd></IoMdAdd>
-                    </Button>
-                  </div>
-                </div>
-              </Accordion.Content>
-            </Accordion.Panel>
-          ))}
-        </Accordion>
-        <Button color="success" onClick={handleSave}>
-          Save
-        </Button>
-      </div>
-      <Modal
-        dismissible
-        show={showModal >= 0}
-        onClose={() => setShowModal(-1)}
-        className="mx-auto"
-      >
-        <Modal.Header>Menu</Modal.Header>
-        <Modal.Body>
-          <div className="space-y-6">
-            {menu.map((m) => (
-              <div key={m.id}>
-                <div
-                  className="flex justify-between  hover:bg-gray-200 p-4 rounded-md"
-                  onClick={() => addMenu(m.id, showModal)}
-                >
-                  <p>{m.menu}</p>
-                  <p>{m.price}</p>
-                </div>
-                <hr />
-              </div>
-            ))}
+                  </Accordion.Content>
+                </Accordion.Panel>
+              ))}
+            </Accordion>
+            <Button color="success" onClick={handleSave}>
+              Save
+            </Button>
           </div>
-        </Modal.Body>
-      </Modal>
+        )}
+        <Modal
+          dismissible
+          show={showModal >= 0}
+          onClose={() => setShowModal(-1)}
+          className="mx-auto"
+        >
+          <Modal.Header>Menu</Modal.Header>
+          <Modal.Body>
+            <div className="space-y-6">
+              {menu.map((m) => (
+                <div key={m.id}>
+                  <div
+                    className="flex justify-between  hover:bg-gray-200 p-4 rounded-md"
+                    onClick={() => addMenu(m.id, showModal)}
+                  >
+                    <p>{m.menu}</p>
+                    <p>{m.price}</p>
+                  </div>
+                  <hr />
+                </div>
+              ))}
+            </div>
+          </Modal.Body>
+        </Modal>
+      </div>
     </div>
   );
 }

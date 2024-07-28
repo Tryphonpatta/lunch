@@ -5,6 +5,8 @@ import { FaCircleUser } from "react-icons/fa6";
 import { createClient } from "../../util/supabase/client";
 import { LunchChoice, Menu, team } from "./type/type";
 import { getDate } from "../../util/date/getDate";
+import { Bounce, toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -81,6 +83,7 @@ export default function Home() {
     setSelectedMenu(temp);
     setIsload(true);
     setDisable(disableTemp);
+    toast.info("loaded");
   };
   const saveUserData = async () => {
     console.log(selectedMenu);
@@ -101,6 +104,7 @@ export default function Home() {
         menuId: selectedMenu[i][0].id,
       });
     }
+    toast.success("saved");
   };
   useEffect(() => {
     fetchTeam();
@@ -108,6 +112,7 @@ export default function Home() {
   }, []);
   return (
     <div className="h-screen">
+      <ToastContainer />
       <div className="p-2 gap-3 flex flex-col">
         <div>
           <div className="mb-2 block">

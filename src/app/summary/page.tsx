@@ -11,24 +11,24 @@ export default function Summary() {
   const [date, setDate] = useState(new Date());
   const [price, setPrice] = useState(0);
   const fetchTodayMeal = async (date: Date) => {
-    console.log(date);
+    // console.log(date);
     const supabase = createClient();
     const localDate = new Date(
       date.getTime() - date.getTimezoneOffset() * 60000
     );
     const formattedDate = localDate.toISOString().split("T")[0];
-    console.log(formattedDate);
+    // console.log(formattedDate);
     let { data: menues, error } = await supabase.rpc("get_menu_counts", {
       selected_date: formattedDate,
     });
-    console.log(menues);
+    // console.log(menues);
     setMenuCount(menues);
     let price = 0;
     for (let menu of menues) {
       console.log(menu);
       price += menu.price * menu.order_count;
     }
-    console.log(price);
+    // console.log(price);
     setPrice(price);
   };
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function Summary() {
           value={date.toDateString()}
           onChange={(e) => {
             if (e) {
-              console.log(e);
+              // console.log(e);
               setDate(e);
               fetchTodayMeal(e);
             }
