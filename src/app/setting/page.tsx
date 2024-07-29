@@ -17,13 +17,15 @@ export default function Page() {
   const [showModal, setShowModal] = useState(-1);
   const [isLogin, setIsLogin] = useState(false);
   const addMenu = (m: number, d: number) => {
+    // console.log(d, m);
     let temp = selectedMenu[d];
-    if (!temp.includes(menu[m])) temp.push(menu[m]);
+    if (!temp.includes(menu[m - 1])) temp.push(menu[m - 1]);
     setSelectedMenu([
       ...selectedMenu.slice(0, d),
       temp,
       ...selectedMenu.slice(d + 1),
     ]);
+    setShowModal(-1);
   };
   const resetMenu = (d: number) => {
     setSelectedMenu([
@@ -33,6 +35,7 @@ export default function Page() {
     ]);
   };
   const removeMenu = (m: number, d: number) => {
+    // console.log(d, m);
     let temp = selectedMenu[d];
     temp = temp.filter((t: Menu) => t.id !== m);
     setSelectedMenu([
@@ -70,7 +73,7 @@ export default function Page() {
     let menuSortFromPrice = menu.toSorted((a, b) => a.price - b.price);
     let normalMenu = menuSortFromPrice.filter((m) => m.price < 70);
     let expensiveMenu = menuSortFromPrice.filter((m) => m.price >= 70);
-    console.log(normalMenu, expensiveMenu);
+    // console.log(normalMenu, expensiveMenu);
     if (rnd > 0.5) {
       // 79 1 meal
       for (let i = 0; i < 4; i++) {
@@ -139,7 +142,7 @@ export default function Page() {
             <h1>Settings</h1>
             <Accordion>
               {date.map((d, i) => (
-                <Accordion.Panel key={`${i + 0}`}>
+                <Accordion.Panel key={`${i + 0} ${d.getDate()}`}>
                   <Accordion.Title>{d.toDateString()}</Accordion.Title>
                   <Accordion.Content>
                     <div className="m-2 flex flex-col gap-3">
