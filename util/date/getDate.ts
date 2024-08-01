@@ -1,18 +1,20 @@
 export function getDate() {
   const today = new Date();
   const dayOfWeek = today.getDay(); // 0 (Sun) to 6 (Sat)
+
+  // Calculate the date of the most recent Monday
   const monday = new Date(today);
-  const tuesday = new Date(today);
-  const wednesday = new Date(today);
-  const thursday = new Date(today);
-  const friday = new Date(today);
-
-  // Adjust to get the Monday of the current week
   monday.setDate(today.getDate() - dayOfWeek + 1);
-  tuesday.setDate(monday.getDate() + 1);
-  wednesday.setDate(monday.getDate() + 2);
-  thursday.setDate(monday.getDate() + 3);
-  friday.setDate(monday.getDate() + 4);
 
-  return [monday, tuesday, wednesday, thursday, friday];
+  // Create an array to store the dates from Monday to Friday
+  let dates: Date[] = [];
+
+  // Generate dates for Monday to Friday
+  for (let dayOffset = 0; dayOffset < 5; dayOffset++) {
+    const inspectedDate = new Date(monday);
+    inspectedDate.setDate(monday.getDate() + dayOffset);
+    dates.push(inspectedDate);
+  }
+
+  return dates;
 }

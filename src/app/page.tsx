@@ -32,6 +32,7 @@ export default function Home() {
   const fetchMenu = async () => {
     let date = getDate();
     setDate(date);
+    // console.log(date);
     const supabase = createClient();
     const temp: Menu[][] = [[], [], [], [], []];
     const disableTemp = [];
@@ -158,10 +159,10 @@ export default function Home() {
         </div>
         {isLoad &&
           date?.map((d, i) => (
-            <div key={`${i + 0}`}>
+            <div key={`${d.toDateString()}`}>
               <div className="mb-2 block">
                 <Label
-                  htmlFor={`${i.toString() + 0}`}
+                  htmlFor={`${d.toDateString() + 0}`}
                   value={`${d.toDateString()}`}
                 />
                 <Checkbox
