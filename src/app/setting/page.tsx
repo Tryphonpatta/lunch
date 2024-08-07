@@ -3,16 +3,18 @@
 import { useEffect, useState } from "react";
 import { createClient } from "../../../util/supabase/client";
 import { getDate } from "../../../util/date/getDate";
-import { Accordion, Button, Modal } from "flowbite-react";
+import { Accordion, Button, Modal, ToggleSwitch } from "flowbite-react";
 import { IoMdAdd } from "react-icons/io";
 import { LunchChoice, Menu } from "../type/type";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import LoginPage from "./components/loginPage";
+import { set } from "react-datepicker/dist/date_utils";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Page() {
   const [menu, setMenu] = useState<Menu[]>([]);
   const [date, setDate] = useState<Date[]>([]);
+  const [disableDate, setDisableDate] = useState<number[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<any>([[], [], [], [], []]);
   const [showModal, setShowModal] = useState(-1);
   const [isLogin, setIsLogin] = useState(false);
@@ -61,6 +63,20 @@ export default function Page() {
           menuId: t.id,
         }))
       );
+    }
+    let { data, error } = await supabase
+      .from("disableDay")
+      .delete()
+      .in(
+        "date",
+        date.map((d) => d.toISOString().split("T")[0])
+      );
+    for (let i = 0; i < 5; i++) {
+      if (disableDate[i] === 1) {
+        let { data, error } = await supabase.from("disableDay").insert({
+          date: date[i].toISOString().split("T")[0],
+        });
+      }
     }
     toast.success("Save success");
   };
@@ -127,9 +143,33 @@ export default function Page() {
     if (menu) setMenu(menu as any);
     // console.log(menu);
   };
+
+  const fetchDisable = async () => {
+    const supabase = createClient();
+    let date = getDate();
+    let { data: disable, error } = await supabase
+      .from("disableDay")
+      .select("*")
+      .in(
+        "date",
+        date.map((d) => d.toISOString().split("T")[0])
+      );
+
+    if (disable) {
+      let temp = [0, 0, 0, 0, 0];
+      for (let d of disable) {
+        temp[
+          date.findIndex((da) => da.toISOString().split("T")[0] === d.date)
+        ] = 1;
+      }
+      setDisableDate(temp);
+    } else setDisableDate([0, 0, 0, 0, 0]);
+    // console.log(disable);
+  };
   useEffect(() => {
     fetchMenu();
     fetchSelectedMenu();
+    fetchDisable();
   }, []);
   return (
     <div>
@@ -146,7 +186,15 @@ export default function Page() {
                   <Accordion.Title>{d.toDateString()}</Accordion.Title>
                   <Accordion.Content>
                     <div className="m-2 flex flex-col gap-3">
-                      <div className="flex w-full justify-end gap-1">
+                      <div className="flex w-full justify-end gap-1 items-center">
+                        <ToggleSwitch
+                          checked={disableDate[i] === 0}
+                          onChange={() => {
+                            let temp = disableDate;
+                            temp[i] = temp[i] === 0 ? 1 : 0;
+                            setDisableDate([...temp]);
+                          }}
+                        />
                         <Button color="warning" onClick={() => randomMenu(i)}>
                           random
                         </Button>

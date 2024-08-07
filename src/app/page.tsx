@@ -14,6 +14,7 @@ export default function Home() {
   const [selectedTeam, setSelectedTeam] = useState<number>(1);
   const [menu, setMenu] = useState<Menu[]>([]);
   const [mealChoice, setMealChoice] = useState<Menu[][]>([]);
+  const [disableDate, setDisableDate] = useState<number[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<Menu[][]>([
     [],
     [],
@@ -37,6 +38,22 @@ export default function Home() {
     const temp: Menu[][] = [[], [], [], [], []];
     const disableTemp = [];
     const { data: menu, error } = await supabase.from("menu").select("*");
+    const { data: disable } = await supabase
+      .from("disableDay")
+      .select("*")
+      .in(
+        "date",
+        date.map((d) => d.toISOString().split("T")[0])
+      );
+    let disableDateTemp = [0, 0, 0, 0, 0];
+    if (disable) {
+      for (let d of disable) {
+        disableDateTemp[
+          date.findIndex((da) => da.toISOString().split("T")[0] === d.date)
+        ] = 1;
+      }
+      setDisableDate(disableDateTemp);
+    } else setDisableDate([0, 0, 0, 0, 0]);
     if (menu) setMenu(menu as any);
     for (let i = 0; i < 5; i++) {
       const formattedDate = date[i].toISOString().split("T")[0];
@@ -168,7 +185,7 @@ export default function Home() {
                 <Checkbox
                   className="mx-2"
                   id="accept"
-                  checked={!disable.includes(i)}
+                  checked={!disable.includes(i) && disableDate[i] === 0}
                   onChange={() => {
                     if (disable.includes(i)) {
                       setDisable(disable.filter((d) => d !== i));
@@ -176,14 +193,14 @@ export default function Home() {
                       setDisable([...disable, i]);
                     }
                   }}
-                  disabled={mealChoice[i]?.length === 0}
+                  disabled={mealChoice[i]?.length === 0 || disableDate[i] === 1}
                 />
               </div>
               <Select
                 id={`${i.toString() + 0}`}
                 required
                 className="max-w-md"
-                disabled={disable.includes(i)}
+                disabled={disable.includes(i) || disableDate[i] === 1}
                 value={selectedMenu[i][0]?.id}
                 onChange={(e) => {
                   // console.log(e.target.value);
