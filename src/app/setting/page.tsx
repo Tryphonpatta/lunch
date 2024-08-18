@@ -80,6 +80,15 @@ export default function Page() {
     }
     toast.success("Save success");
   };
+
+  const checkDupMenu = (m: Menu) => {
+    let temp = selectedMenu;
+    for (let i = 0; i < 5; i++) {
+      if (temp[i].includes(m)) return true;
+    }
+    return false;
+  };
+
   const randomMenu = async (d: number) => {
     let typeTemp = "";
     let randomMenu = [] as Menu[];
@@ -92,9 +101,12 @@ export default function Page() {
     // console.log(normalMenu, expensiveMenu);
     if (rnd > 0.5) {
       // 79 1 meal
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 3; i++) {
         let index = Math.round(Math.random() * (normalMenu.length - 1));
-        while (randomMenu.includes(normalMenu[index])) {
+        while (
+          randomMenu.includes(normalMenu[index]) ||
+          checkDupMenu(normalMenu[index])
+        ) {
           index = Math.round(Math.random() * (normalMenu.length - 1));
         }
         randomMenu.push(normalMenu[index]);
@@ -102,7 +114,7 @@ export default function Page() {
       let index = Math.round(Math.random() * (expensiveMenu.length - 1));
       randomMenu.push(expensiveMenu[index]);
     } else {
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 4; i++) {
         let index = Math.round(Math.random() * (normalMenu.length - 1));
         while (randomMenu.includes(normalMenu[index])) {
           index = Math.round(Math.random() * (normalMenu.length - 1));
@@ -110,6 +122,21 @@ export default function Page() {
         randomMenu.push(normalMenu[index]);
       }
     }
+    const chicken: Menu[] = menu.filter((m) => m.type === "ไก่");
+    const fish = menu.filter((m) => m.type === "ปลา");
+    let index = Math.round(Math.random() * (chicken.length - 1));
+    while (
+      randomMenu.includes(chicken[index]) ||
+      checkDupMenu(chicken[index])
+    ) {
+      index = Math.round(Math.random() * (chicken.length - 1));
+    }
+    randomMenu.push(chicken[index]);
+    rnd = Math.random();
+    while (randomMenu.includes(fish[index]) || checkDupMenu(fish[index])) {
+      index = Math.round(Math.random() * (fish.length - 1));
+    }
+    randomMenu.push(fish[index]);
 
     setSelectedMenu([
       ...selectedMenu.slice(0, d),
