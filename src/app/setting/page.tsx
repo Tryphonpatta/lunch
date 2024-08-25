@@ -14,14 +14,14 @@ import "react-toastify/dist/ReactToastify.css";
 export default function Page() {
   const [menu, setMenu] = useState<Menu[]>([]);
   const [date, setDate] = useState<Date[]>([]);
+  const [menuMap, setMenuMap] = useState<Map<number, Menu>>(new Map());
   const [disableDate, setDisableDate] = useState<number[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<any>([[], [], [], [], []]);
   const [showModal, setShowModal] = useState(-1);
   const [isLogin, setIsLogin] = useState(false);
   const addMenu = (m: number, d: number) => {
-    // console.log(d, m);
     let temp = selectedMenu[d];
-    if (!temp.includes(menu[m - 1])) temp.push(menu[m - 1]);
+    if (!temp.includes(menuMap.get(m))) temp.push(menuMap.get(m));
     setSelectedMenu([
       ...selectedMenu.slice(0, d),
       temp,
@@ -46,6 +46,7 @@ export default function Page() {
       ...selectedMenu.slice(d + 1),
     ]);
   };
+  // console.log(selectedMenu);
   const handleSave = async () => {
     const supabase = createClient();
     for (let i = 0; i < 5; i++) {
@@ -92,49 +93,49 @@ export default function Page() {
   const randomMenu = async (d: number) => {
     let typeTemp = "";
     let randomMenu = [] as Menu[];
-    let first = 0;
-    let last = 0;
     let rnd = Math.random();
     let menuSortFromPrice = menu.toSorted((a, b) => a.price - b.price);
     let normalMenu = menuSortFromPrice.filter((m) => m.price < 70);
     let expensiveMenu = menuSortFromPrice.filter((m) => m.price >= 70);
-    // console.log(normalMenu, expensiveMenu);
     if (rnd > 0.5) {
       // 79 1 meal
-      for (let i = 0; i < 3; i++) {
-        let index = Math.round(Math.random() * (normalMenu.length - 1));
+      for (let i = 0; i < 2; i++) {
+        let index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         while (
           randomMenu.includes(normalMenu[index]) ||
           checkDupMenu(normalMenu[index])
         ) {
-          index = Math.round(Math.random() * (normalMenu.length - 1));
+          index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         }
         randomMenu.push(normalMenu[index]);
       }
-      let index = Math.round(Math.random() * (expensiveMenu.length - 1));
+      let index = Math.ceil(Math.random() * (expensiveMenu.length - 1)) - 1;
       randomMenu.push(expensiveMenu[index]);
     } else {
-      for (let i = 0; i < 4; i++) {
-        let index = Math.round(Math.random() * (normalMenu.length - 1));
-        while (randomMenu.includes(normalMenu[index])) {
-          index = Math.round(Math.random() * (normalMenu.length - 1));
+      for (let i = 0; i < 3; i++) {
+        let index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
+        while (
+          randomMenu.includes(normalMenu[index]) ||
+          checkDupMenu(normalMenu[index])
+        ) {
+          index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         }
         randomMenu.push(normalMenu[index]);
       }
     }
     const chicken: Menu[] = menu.filter((m) => m.type === "ไก่");
     const fish = menu.filter((m) => m.type === "ปลา");
-    let index = Math.round(Math.random() * (chicken.length - 1));
+    let index = Math.ceil(Math.random() * (chicken.length - 1)) - 1;
     while (
       randomMenu.includes(chicken[index]) ||
       checkDupMenu(chicken[index])
     ) {
-      index = Math.round(Math.random() * (chicken.length - 1));
+      index = Math.ceil(Math.random() * (chicken.length - 1)) - 1;
     }
     randomMenu.push(chicken[index]);
     rnd = Math.random();
     while (randomMenu.includes(fish[index]) || checkDupMenu(fish[index])) {
-      index = Math.round(Math.random() * (fish.length - 1));
+      index = Math.ceil(Math.random() * (fish.length - 1)) - 1;
     }
     randomMenu.push(fish[index]);
 
@@ -167,7 +168,14 @@ export default function Page() {
   const fetchMenu = async () => {
     const supabase = createClient();
     let { data: menu, error } = await supabase.from("menu").select("*");
-    if (menu) setMenu(menu as any);
+    if (menu) {
+      setMenu(menu as any);
+      let temp = new Map();
+      for (let m of menu) {
+        temp.set(m.id, m);
+      }
+      setMenuMap(temp);
+    }
     // console.log(menu);
   };
 

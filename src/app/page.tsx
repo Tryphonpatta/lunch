@@ -13,6 +13,7 @@ export default function Home() {
   const [team, setTeam] = useState<team[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<number>(1);
   const [menu, setMenu] = useState<Menu[]>([]);
+  const [menuMap, setMenuMap] = useState<Map<number, Menu>>(new Map());
   const [mealChoice, setMealChoice] = useState<Menu[][]>([]);
   const [disableDate, setDisableDate] = useState<number[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<Menu[][]>([
@@ -38,6 +39,13 @@ export default function Home() {
     const temp: Menu[][] = [[], [], [], [], []];
     const disableTemp = [];
     const { data: menu, error } = await supabase.from("menu").select("*");
+    if (menu) {
+      const temp = new Map<number, Menu>();
+      for (let m of menu) {
+        temp.set(m.id, m);
+      }
+      setMenuMap(temp);
+    }
     const { data: disable } = await supabase
       .from("disableDay")
       .select("*")
@@ -78,7 +86,7 @@ export default function Home() {
         .from("user-lunch")
         .select(`*, menu:menuId(*)`)
         .eq("date", formattedDate)
-        .eq("team", team[selectedTeam - 1].team)
+        .eq("team", team[team.findIndex((t) => t.id === selectedTeam)].team)
         .eq("user", name);
       const userMeal = userMealtemp as any;
       if (
@@ -111,13 +119,13 @@ export default function Home() {
         .from("user-lunch")
         .delete()
         .eq("date", formattedDate)
-        .eq("team", team[selectedTeam - 1].team)
+        .eq("team", team[team.findIndex((t) => t.id === selectedTeam)].team)
         .eq("user", name);
       if (disable.includes(i)) continue;
       if (selectedMenu[i].length === 0) continue;
       let { data: userLunch } = await supabase.from("user-lunch").insert({
         date: formattedDate,
-        team: team[selectedTeam - 1].team,
+        team: team[team.findIndex((t) => t.id === selectedTeam)].team,
         user: `${name}`,
         menuId: selectedMenu[i][0].id,
       });
@@ -203,10 +211,10 @@ export default function Home() {
                 disabled={disable.includes(i) || disableDate[i] === 1}
                 value={selectedMenu[i][0]?.id}
                 onChange={(e) => {
-                  // console.log(e.target.value);
+                  const m = menuMap.get(parseInt(e.target.value));
                   setSelectedMenu([
                     ...selectedMenu.slice(0, i),
-                    [menu[parseInt(e.target.value) - 1]],
+                    [m as Menu],
                     ...selectedMenu.slice(i + 1),
                   ]);
                 }}
