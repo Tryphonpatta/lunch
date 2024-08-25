@@ -7,6 +7,7 @@ import { LunchChoice, Menu, team } from "./type/type";
 import { getDate } from "../../util/date/getDate";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { table } from "console";
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -29,7 +30,10 @@ export default function Home() {
   const supabase = createClient();
   const fetchTeam = async () => {
     let { data: team, error } = await supabase.from("team").select("*");
-    if (team) setTeam(team as any);
+    if (team) {
+      setTeam(team as any);
+      setSelectedTeam(team[0].id);
+    }
   };
   const fetchMenu = async () => {
     let date = getDate();
