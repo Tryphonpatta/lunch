@@ -87,10 +87,6 @@ export default function Summary() {
             </Accordion.Panel>
           ))}
         </Accordion>
-        <div className="flex justify-between w-full">
-          <p>Total</p>
-          <p>{price}</p>
-        </div>
       </Card>
     </div>
   );
