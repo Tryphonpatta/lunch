@@ -8,6 +8,8 @@ import { getDate } from "../../util/date/getDate";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { table } from "console";
+import { set } from "react-datepicker/dist/date_utils";
+import moment from "moment";
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -27,6 +29,8 @@ export default function Home() {
   const [disable, setDisable] = useState<Number[]>([]);
   const [date, setDate] = useState<Date[]>([]);
   const [isLoad, setIsload] = useState(false);
+  const [isFinishSubmit, setIsFinishSubmit] = useState(false);
+
   const supabase = createClient();
   const fetchTeam = async () => {
     let { data: team, error } = await supabase.from("team").select("*");
@@ -55,20 +59,20 @@ export default function Home() {
       .select("*")
       .in(
         "date",
-        date.map((d) => d.toISOString().split("T")[0])
+        date.map((d) => moment(d).format("YYYY-MM-DD"))
       );
     let disableDateTemp = [0, 0, 0, 0, 0];
     if (disable) {
       for (let d of disable) {
         disableDateTemp[
-          date.findIndex((da) => da.toISOString().split("T")[0] === d.date)
+          date.findIndex((da) => moment(da).format("YYYY-MM-DD") === d.date)
         ] = 1;
       }
       setDisableDate(disableDateTemp);
     } else setDisableDate([0, 0, 0, 0, 0]);
     if (menu) setMenu(menu as any);
     for (let i = 0; i < 5; i++) {
-      const formattedDate = date[i].toISOString().split("T")[0];
+      const formattedDate = moment(date[i]).format("YYYY-MM-DD");
       let { data: menu, error } = await supabase
         .from("lunch-choice")
         .select(`*, menu:menuId(*)`)
@@ -85,7 +89,7 @@ export default function Home() {
     const temp = [[], [], [], [], []] as any;
     const disableTemp = disable;
     for (let i = 0; i < 5; i++) {
-      const formattedDate = date[i].toISOString().split("T")[0];
+      const formattedDate = moment(date[i]).format("YYYY-MM-DD");
       const { data: userMealtemp } = await supabase
         .from("user-lunch")
         .select(`*, menu:menuId(*)`)
@@ -116,9 +120,11 @@ export default function Home() {
     toast.info("loaded");
   };
   const saveUserData = async () => {
+    if (isFinishSubmit) return;
+    setIsFinishSubmit(true);
     // console.log(selectedMenu);
     for (let i = 0; i < 5; i++) {
-      const formattedDate = date[i].toISOString().split("T")[0];
+      const formattedDate = moment(date[i]).format("YYYY-MM-DD");
       await supabase
         .from("user-lunch")
         .delete()
@@ -135,6 +141,7 @@ export default function Home() {
       });
     }
     toast.success("saved");
+    setIsFinishSubmit(false);
   };
   useEffect(() => {
     fetchTeam();

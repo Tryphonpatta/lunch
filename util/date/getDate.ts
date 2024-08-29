@@ -1,5 +1,6 @@
 export function getDate() {
   const today = new Date();
+  console.log("today", today);
   const dayOfWeek = today.getDay(); // 0 (Sun) to 6 (Sat)
 
   // Calculate the date of the most recent Monday

@@ -10,6 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import LoginPage from "./components/loginPage";
 import { set } from "react-datepicker/dist/date_utils";
 import "react-toastify/dist/ReactToastify.css";
+import moment from "moment";
 
 export default function Page() {
   const [menu, setMenu] = useState<Menu[]>([]);
@@ -19,6 +20,7 @@ export default function Page() {
   const [selectedMenu, setSelectedMenu] = useState<any>([[], [], [], [], []]);
   const [showModal, setShowModal] = useState(-1);
   const [isLogin, setIsLogin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const addMenu = (m: number, d: number) => {
     let temp = selectedMenu[d];
     if (!temp.includes(menuMap.get(m))) temp.push(menuMap.get(m));
@@ -39,6 +41,7 @@ export default function Page() {
   const removeMenu = (m: number, d: number) => {
     // console.log(d, m);
     let temp = selectedMenu[d];
+    console.log(selectedMenu[d]);
     temp = temp.filter((t: Menu) => t.id !== m);
     setSelectedMenu([
       ...selectedMenu.slice(0, d),
@@ -48,9 +51,11 @@ export default function Page() {
   };
   // console.log(selectedMenu);
   const handleSave = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     const supabase = createClient();
     for (let i = 0; i < 5; i++) {
-      const formattedDate = date[i].toISOString().split("T")[0];
+      const formattedDate = moment(date[i]).format("YYYY-MM-DD");
       let { data, error } = await supabase
         .from("lunch-choice")
         .delete()
@@ -70,16 +75,17 @@ export default function Page() {
       .delete()
       .in(
         "date",
-        date.map((d) => d.toISOString().split("T")[0])
+        date.map((d) => moment(d).format("YYYY-MM-DD"))
       );
     for (let i = 0; i < 5; i++) {
       if (disableDate[i] === 1) {
         let { data, error } = await supabase.from("disableDay").insert({
-          date: date[i].toISOString().split("T")[0],
+          date: moment(date[i]).format("YYYY-MM-DD"),
         });
       }
     }
     toast.success("Save success");
+    setIsLoading(false);
   };
 
   const checkDupMenu = (m: Menu) => {
@@ -110,6 +116,12 @@ export default function Page() {
         randomMenu.push(normalMenu[index]);
       }
       let index = Math.ceil(Math.random() * (expensiveMenu.length - 1)) - 1;
+      while (
+        randomMenu.includes(expensiveMenu[index]) ||
+        checkDupMenu(expensiveMenu[index])
+      ) {
+        index = Math.ceil(Math.random() * (expensiveMenu.length - 1)) - 1;
+      }
       randomMenu.push(expensiveMenu[index]);
     } else {
       for (let i = 0; i < 3; i++) {
@@ -152,7 +164,7 @@ export default function Page() {
     const supabase = createClient();
     const temp: LunchChoice[][] = [[], [], [], [], []];
     for (let i = 0; i < 5; i++) {
-      const formattedDate = date[i].toISOString().split("T")[0];
+      const formattedDate = moment(date[i]).format("YYYY-MM-DD");
       // console.log(date[i], formattedDate);
       let { data: menu, error } = await supabase
         .from("lunch-choice")
@@ -187,14 +199,14 @@ export default function Page() {
       .select("*")
       .in(
         "date",
-        date.map((d) => d.toISOString().split("T")[0])
+        date.map((d) => moment(d).format("YYYY-MM-DD"))
       );
 
     if (disable) {
       let temp = [0, 0, 0, 0, 0];
       for (let d of disable) {
         temp[
-          date.findIndex((da) => da.toISOString().split("T")[0] === d.date)
+          date.findIndex((da) => moment(da).format("YYYY-MM-DD") === d.date)
         ] = 1;
       }
       setDisableDate(temp);
