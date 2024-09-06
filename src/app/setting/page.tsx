@@ -41,7 +41,7 @@ export default function Page() {
   const removeMenu = (m: number, d: number) => {
     // console.log(d, m);
     let temp = selectedMenu[d];
-    console.log(selectedMenu[d]);
+    // console.log(selectedMenu[d]);
     temp = temp.filter((t: Menu) => t.id !== m);
     setSelectedMenu([
       ...selectedMenu.slice(0, d),
@@ -56,6 +56,7 @@ export default function Page() {
     const supabase = createClient();
     for (let i = 0; i < 5; i++) {
       const formattedDate = moment(date[i]).format("YYYY-MM-DD");
+      // console.log("save", formattedDate);
       let { data, error } = await supabase
         .from("lunch-choice")
         .delete()
@@ -63,9 +64,10 @@ export default function Page() {
     }
     for (let i = 0; i < 5; i++) {
       let temp = selectedMenu[i];
+      const formattedDate = moment(date[i]).format("YYYY-MM-DD");
       let { data, error } = await supabase.from("lunch-choice").insert(
         temp.map((t: Menu) => ({
-          date: date[i],
+          date: formattedDate,
           menuId: t.id,
         }))
       );
@@ -165,7 +167,7 @@ export default function Page() {
     const temp: LunchChoice[][] = [[], [], [], [], []];
     for (let i = 0; i < 5; i++) {
       const formattedDate = moment(date[i]).format("YYYY-MM-DD");
-      // console.log(date[i], formattedDate);
+      date[i], formattedDate;
       let { data: menu, error } = await supabase
         .from("lunch-choice")
         .select(`*, menu:menuId(*)`)

@@ -1,7 +1,22 @@
+import moment from "moment";
+
 export function getDate() {
   const today = new Date();
-  console.log("today", today);
-  const dayOfWeek = today.getDay(); // 0 (Sun) to 6 (Sat)
+  // console.log("today", today);
+  const dayOfWeek = today.getDay();
+  if (dayOfWeek >= 5) {
+    const today = moment();
+    const nextMonday = today.add(3, "days").startOf("week").add(1, "day");
+
+    // Return the next week's Monday to Friday
+    const nextWeek = [];
+    for (let i = 0; i < 5; i++) {
+      nextWeek.push(nextMonday.clone().add(i, "days").toDate());
+    }
+
+    return nextWeek; // [Date objects for Monday to Friday]
+  }
+  // 0 (Sun) to 6 (Sat)
 
   // Calculate the date of the most recent Monday
   const monday = new Date(today);
