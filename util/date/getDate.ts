@@ -4,9 +4,10 @@ export function getDate() {
   const today = new Date();
   // console.log("today", today);
   const dayOfWeek = today.getDay();
-  if (dayOfWeek >= 5) {
+  if (dayOfWeek >= 4) {
+    // morethan or equal to Thursday
     const today = moment();
-    const nextMonday = today.add(3, "days").startOf("week").add(1, "day");
+    const nextMonday = today.add(4, "days").startOf("week").add(1, "day");
 
     // Return the next week's Monday to Friday
     const nextWeek = [];
