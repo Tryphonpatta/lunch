@@ -100,6 +100,21 @@ export default function Page() {
 
   const randomMenu = async (d: number) => {
     let typeTemp = "";
+    const supabase = createClient();
+    const { data: oldMenu } = await supabase
+      .from("lunch-choice")
+      .select("* , menu:menuId(*)")
+      .lt("date", moment(date[d]).format("YYYY-MM-DD"))
+      .order("date", { ascending: false })
+      .limit(30);
+    const oldMenuFlatSet = new Set(
+      oldMenu
+        ?.map((m) => m.menu)
+        .sort((a, b) => a.id - b.id)
+        .map((m) => m.id)
+    );
+    //sort oldMenuFlatset
+
     let randomMenu = [] as Menu[];
     let rnd = Math.random();
     let menuSortFromPrice = menu.toSorted((a, b) => a.price - b.price);
@@ -111,7 +126,8 @@ export default function Page() {
         let index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         while (
           randomMenu.includes(normalMenu[index]) ||
-          checkDupMenu(normalMenu[index])
+          checkDupMenu(normalMenu[index]) ||
+          oldMenuFlatSet.has(normalMenu[index].id)
         ) {
           index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         }
@@ -120,7 +136,8 @@ export default function Page() {
       let index = Math.ceil(Math.random() * (expensiveMenu.length - 1)) - 1;
       while (
         randomMenu.includes(expensiveMenu[index]) ||
-        checkDupMenu(expensiveMenu[index])
+        checkDupMenu(expensiveMenu[index]) ||
+        oldMenuFlatSet.has(expensiveMenu[index].id)
       ) {
         index = Math.ceil(Math.random() * (expensiveMenu.length - 1)) - 1;
       }
@@ -130,7 +147,8 @@ export default function Page() {
         let index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         while (
           randomMenu.includes(normalMenu[index]) ||
-          checkDupMenu(normalMenu[index])
+          checkDupMenu(normalMenu[index]) ||
+          oldMenuFlatSet.has(normalMenu[index].id)
         ) {
           index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         }
@@ -142,13 +160,18 @@ export default function Page() {
     let index = Math.ceil(Math.random() * (chicken.length - 1)) - 1;
     while (
       randomMenu.includes(chicken[index]) ||
-      checkDupMenu(chicken[index])
+      checkDupMenu(chicken[index]) ||
+      oldMenuFlatSet.has(chicken[index].id)
     ) {
       index = Math.ceil(Math.random() * (chicken.length - 1)) - 1;
     }
     randomMenu.push(chicken[index]);
     rnd = Math.random();
-    while (randomMenu.includes(fish[index]) || checkDupMenu(fish[index])) {
+    while (
+      randomMenu.includes(fish[index]) ||
+      checkDupMenu(fish[index]) ||
+      oldMenuFlatSet.has(fish[index].id)
+    ) {
       index = Math.ceil(Math.random() * (fish.length - 1)) - 1;
     }
     randomMenu.push(fish[index]);
