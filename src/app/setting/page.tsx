@@ -106,7 +106,7 @@ export default function Page() {
       .select("* , menu:menuId(*)")
       .lt("date", moment(date[d]).format("YYYY-MM-DD"))
       .order("date", { ascending: false })
-      .limit(30);
+      .limit(60);
     const oldMenuFlatSet = new Set(
       oldMenu
         ?.map((m) => m.menu)
