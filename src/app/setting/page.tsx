@@ -120,37 +120,48 @@ export default function Page() {
     let menuSortFromPrice = menu.toSorted((a, b) => a.price - b.price);
     let normalMenu = menuSortFromPrice.filter((m) => m.price < 70);
     let expensiveMenu = menuSortFromPrice.filter((m) => m.price >= 70);
+    let faultTorelance = 0;
     if (rnd > 0.5) {
       // 79 1 meal
       for (let i = 0; i < 2; i++) {
         let index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         while (
-          randomMenu.includes(normalMenu[index]) ||
-          checkDupMenu(normalMenu[index]) ||
-          oldMenuFlatSet.has(normalMenu[index].id)
+          (randomMenu.includes(normalMenu[index]) ||
+            checkDupMenu(normalMenu[index]) ||
+            oldMenuFlatSet.has(normalMenu[index].id)) &&
+          faultTorelance < 10
         ) {
+          // console.log(index);
           index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
+          faultTorelance++;
         }
         randomMenu.push(normalMenu[index]);
       }
+      faultTorelance = 0;
       let index = Math.ceil(Math.random() * (expensiveMenu.length - 1)) - 1;
       while (
-        randomMenu.includes(expensiveMenu[index]) ||
-        checkDupMenu(expensiveMenu[index]) ||
-        oldMenuFlatSet.has(expensiveMenu[index].id)
+        (randomMenu.includes(expensiveMenu[index]) ||
+          checkDupMenu(expensiveMenu[index]) ||
+          oldMenuFlatSet.has(expensiveMenu[index].id)) &&
+        faultTorelance < 10
       ) {
+        // console.log(index);
         index = Math.ceil(Math.random() * (expensiveMenu.length - 1)) - 1;
+        faultTorelance++;
       }
       randomMenu.push(expensiveMenu[index]);
     } else {
       for (let i = 0; i < 3; i++) {
         let index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
         while (
-          randomMenu.includes(normalMenu[index]) ||
-          checkDupMenu(normalMenu[index]) ||
-          oldMenuFlatSet.has(normalMenu[index].id)
+          (randomMenu.includes(normalMenu[index]) ||
+            checkDupMenu(normalMenu[index]) ||
+            oldMenuFlatSet.has(normalMenu[index].id)) &&
+          faultTorelance < 10
         ) {
+          // console.log(index);
           index = Math.ceil(Math.random() * (normalMenu.length - 1)) - 1;
+          faultTorelance++;
         }
         randomMenu.push(normalMenu[index]);
       }
